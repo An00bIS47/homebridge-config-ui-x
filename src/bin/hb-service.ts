@@ -28,6 +28,8 @@ export class HomebridgeServiceHelper {
   public selfPath = __filename;
   public serviceName = 'Homebridge';
   public storagePath;
+  public loggingPath;
+  public usingCustomLoggingPath = false;
   public usingCustomStoragePath = false;
   public allowRunRoot = false;
   public asUser;
@@ -53,6 +55,10 @@ export class HomebridgeServiceHelper {
   private installer: Win32Installer | LinuxInstaller | DarwinInstaller;
 
   get logPath(): string {
+
+    if (this.usingCustomLoggingPath === true) {
+      return path.resolve(this.loggingPath, 'homebridge.log');  
+    }
     return path.resolve(this.storagePath, 'homebridge.log');
   }
 
@@ -82,6 +88,7 @@ export class HomebridgeServiceHelper {
       .arguments('[install|uninstall|start|stop|restart|rebuild|run|logs]')
       .option('-P, --plugin-path <path>', '', (p) => { process.env.UIX_CUSTOM_PLUGIN_PATH = p; this.homebridgeOpts.push('-P', p); })
       .option('-U, --user-storage-path <path>', '', (p) => { this.storagePath = p; this.usingCustomStoragePath = true; })
+      .option('-L, --logging-path <path>', 'The path to the directory where the log file should be stored', (p) => { this.loggingPath = p; this.usingCustomLoggingPath = true; })      
       .option('-S, --service-name <service name>', 'The name of the homebridge service to install or control', (p) => this.serviceName = p)
       .option('--port <port>', 'The port to set to the Homebridge UI when installing as a service', (p) => this.uiPort = parseInt(p, 10))
       .option('--user <user>', 'The user account the Homebridge service will be installed as (Linux, macOS only)', (p) => this.asUser = p)
